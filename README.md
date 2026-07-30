@@ -7,8 +7,7 @@ profillarni va to'lovlarni moderatsiya qiladi, superadmin esa butun tizim hisobo
 ko'radi va manager akkauntlarini boshqaradi.
 
 Bitta FastAPI ilovasi ichida ham JSON API, ham server-rendered (Jinja2) veb-interfeys
-ishlaydi. Batafsil texnik tushuntirish — [`code_explanation.md`](code_explanation.md).
-
+ishlaydi. 
 ---
 
 ## Tezkor ishga tushirish
