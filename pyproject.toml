@@ -1,0 +1,26 @@
+[project]
+name = "edugroup"
+version = "2.0.0"
+description = "O'qituvchilar va guruhlar uchun onlayn ta'lim platformasi"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = [
+    "ignore::DeprecationWarning:passlib.*",
+    "ignore::DeprecationWarning:jose.*",
+]
+
+[tool.coverage.run]
+source = ["app"]
+omit = ["app/main.py", "*/tasks.py"]
+# SQLAlchemy'ning async qatlami greenlet ustida ishlaydi — busiz coverage
+# service funksiyalari ichidagi qatorlarni "bajarilmagan" deb ko'rsatadi.
+concurrency = ["greenlet", "thread"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true

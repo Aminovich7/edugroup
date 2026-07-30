@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}Superadmin paneli — EduGroup{% endblock %}
+
+{% block content %}
+<h1>Superadmin paneli</h1>
+
+<section class="stats">
+  <div class="stat"><span>{{ overview.total_users }}</span> foydalanuvchi</div>
+  <div class="stat"><span>{{ overview.total_students }}</span> o'quvchi</div>
+  <div class="stat"><span>{{ overview.total_teachers }}</span> o'qituvchi</div>
+  <div class="stat"><span>{{ overview.total_managers }}</span> manager</div>
+  <div class="stat"><span>{{ overview.active_groups }}</span> faol guruh</div>
+  <div class="stat"><span>{{ overview.active_enrollments }}</span> faol yozilish</div>
+  <div class="stat"><span>{{ overview.waitlisted_enrollments }}</span> navbatda</div>
+  <div class="stat"><span>{{ overview.total_revenue | money }}</span> so'm daromad</div>
+</section>
+
+<section class="card">
+  <h2>Daromad hisoboti</h2>
+  <form method="get" action="/dashboard/superadmin" class="filters">
+    <label class="field">
+      <span>Sanadan</span>
+      <input type="date" name="date_from" value="{{ filters.date_from }}">
+    </label>
+    <label class="field">
+      <span>Sanagacha</span>
+      <input type="date" name="date_to" value="{{ filters.date_to }}">
+    </label>
+    <button class="button button-primary" type="submit">Filtrlash</button>
+    <a class="button button-ghost" href="/dashboard/superadmin">Tozalash</a>
+  </form>
+
+  {% if revenue.rows %}
+    <table class="table">
+      <thead><tr><th>Guruh</th><th>O'qituvchi</th><th>To'lovlar</th><th>Summa</th></tr></thead>
+      <tbody>
+        {% for row in revenue.rows %}
+          <tr>
+            <td><a href="/reports/groups/{{ row.group_id }}">{{ row.group_name }}</a></td>
+            <td>{{ row.teacher_name }}</td>
+            <td>{{ row.payments_count }}</td>
+            <td>{{ row.amount | money }} so'm</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="3">Jami</th>
+          <th>{{ revenue.total_amount | money }} so'm</th>
+        </tr>
+      </tfoot>
+    </table>
+  {% else %}
+    <p class="muted">Tanlangan davrda tasdiqlangan to'lov yo'q.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>To'lovlar ({{ payments_count }} ta, jami {{ payments_total | money }} so'm)</h2>
+  {% if payments %}
+    <table class="table">
+      <thead><tr><th>Sana</th><th>Summa</th><th>Holat</th><th>Izoh</th></tr></thead>
+      <tbody>
+        {% for payment in payments %}
+          <tr>
+            <td>{{ payment.created_at.strftime("%Y-%m-%d") }}</td>
+            <td>{{ payment.amount | money }} so'm</td>
+            <td><span class="badge badge-{{ payment.status.value }}">{{ payment.status.value }}</span></td>
+            <td>{{ payment.note or "" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">To'lovlar yo'q.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>O'qituvchilar</h2>
+  <table class="table">
+    <thead><tr><th>Ism</th><th>Email</th><th>Holat</th><th>Amal</th></tr></thead>
+    <tbody>
+      {% for teacher in teachers %}
+        <tr>
+          <td><a href="/reports/teachers/{{ teacher.id }}">{{ teacher.full_name }}</a></td>
+          <td>{{ teacher.email }}</td>
+          <td><span class="badge badge-{{ teacher.status.value }}">{{ teacher.status.value }}</span></td>
+          <td>{% with user = teacher %}{% include "partials/block_buttons.html" %}{% endwith %}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h2>O'quvchilar</h2>
+  <table class="table">
+    <thead><tr><th>Ism</th><th>Email</th><th>Holat</th><th>Amal</th></tr></thead>
+    <tbody>
+      {% for student in students %}
+        <tr>
+          <td>{{ student.full_name }}</td>
+          <td>{{ student.email }}</td>
+          <td><span class="badge badge-{{ student.status.value }}">{{ student.status.value }}</span></td>
+          <td>{% with user = student %}{% include "partials/block_buttons.html" %}{% endwith %}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h2>Managerlar</h2>
+  <a class="button button-ghost" href="/web/superadmin/managers">Manager boshqaruvi sahifasi</a>
+
+  <form method="post" action="/web/superadmin/managers" class="form form-inline">
+    <input type="text" name="full_name" placeholder="To'liq ism" required minlength="3">
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="text" name="phone" placeholder="Telefon">
+    <input type="password" name="password" placeholder="Parol (8+)" required minlength="8">
+    <button class="button button-primary" type="submit">Manager yaratish</button>
+  </form>
+
+  <table class="table">
+    <thead><tr><th>Ism</th><th>Email</th><th>Holat</th><th>Amal</th></tr></thead>
+    <tbody>
+      {% for manager in managers %}
+        <tr>
+          <td>{{ manager.full_name }}</td>
+          <td>{{ manager.email }}</td>
+          <td><span class="badge badge-{{ manager.status.value }}">{{ manager.status.value }}</span></td>
+          <td>{% with user = manager %}{% include "partials/block_buttons.html" %}{% endwith %}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h2>Audit log</h2>
+  <form method="get" action="/dashboard/superadmin" class="filters">
+    <label class="field">
+      <span>Obyekt turi</span>
+      <select name="entity_type">
+        <option value="">— barchasi —</option>
+        {% for option in ["course", "group", "lesson"] %}
+          <option value="{{ option }}" {% if filters.entity_type == option %}selected{% endif %}>
+            {{ option }}
+          </option>
+        {% endfor %}
+      </select>
+    </label>
+    <button class="button button-primary" type="submit">Filtrlash</button>
+  </form>
+
+  {% if audit_logs %}
+    <table class="table">
+      <thead><tr><th>Sana</th><th>Obyekt</th><th>Amal</th><th>O'zgarishlar</th><th></th></tr></thead>
+      <tbody>
+        {% for log in audit_logs %}
+          <tr>
+            <td>{{ log.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+            <td>{{ log.entity_type.value }}</td>
+            <td><span class="badge badge-{{ log.action.value }}">{{ log.action.value }}</span></td>
+            <td class="changes">{{ log.changes or "" }}</td>
+            <td>
+              {% if log.action.value == "delete" %}
+                <form method="post" action="/web/{{ log.entity_type.value }}s/{{ log.entity_id }}/restore">
+                  <button class="button button-ghost" type="submit">Tiklash</button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">Audit yozuvlari yo'q.</p>
+  {% endif %}
+</section>
+{% endblock %}

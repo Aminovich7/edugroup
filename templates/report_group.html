@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Guruh hisoboti — EduGroup{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1>{{ report.group_name }}</h1>
+  <p class="muted">{{ report.course_title }} — {{ report.teacher_name }}</p>
+
+  <div class="stats">
+    <div class="stat"><span>{{ report.capacity }}</span> sig'im</div>
+    <div class="stat"><span>{{ report.active_students }}</span> faol o'quvchi</div>
+    <div class="stat"><span>{{ report.awaiting_payment_students }}</span> to'lov kutilmoqda</div>
+    <div class="stat"><span>{{ report.waitlisted_students }}</span> navbatda</div>
+    <div class="stat"><span>{{ report.lessons_count }}</span> dars</div>
+    <div class="stat"><span>{{ report.total_revenue | money }}</span> so'm daromad</div>
+  </div>
+
+  <a class="button button-ghost" href="/groups/{{ report.group_id }}">Guruh sahifasi</a>
+</section>
+{% endblock %}

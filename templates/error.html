@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Xatolik {{ status_code }} — EduGroup{% endblock %}
+
+{% block content %}
+<section class="card card-centered">
+  <h1 class="error-code">{{ status_code }}</h1>
+  <p>{{ message }}</p>
+  <a class="button button-primary" href="/">Bosh sahifaga qaytish</a>
+</section>
+{% endblock %}

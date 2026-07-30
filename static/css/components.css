@@ -1,0 +1,250 @@
+/* Kartalar, tugmalar, formalar, jadvallar va status badge'lari. */
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.sub-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+  background: var(--color-background);
+}
+
+.card-narrow { max-width: 480px; margin-left: auto; margin-right: auto; }
+.card-centered { text-align: center; }
+
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+/* Tugmalar */
+.button {
+  display: inline-block;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: center;
+}
+
+.button:hover { text-decoration: none; opacity: 0.9; }
+
+.button-primary { background: var(--color-primary); color: #fff; }
+.button-danger { background: var(--color-danger); color: #fff; }
+.button-ghost {
+  background: transparent;
+  color: var(--color-primary);
+  border-color: var(--color-border);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+  margin-top: var(--space-sm);
+}
+
+/* Formalar */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin: var(--space-md) 0;
+}
+
+.form-inline {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.inline-form {
+  display: inline-flex;
+  gap: var(--space-sm);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+
+input, select, textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 0.95rem;
+  background: var(--color-surface);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+input:disabled { background: var(--color-background); color: var(--color-muted); }
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: flex-end;
+  margin-bottom: var(--space-md);
+}
+
+/* Jadvallar */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--space-sm) 0;
+  font-size: 0.92rem;
+  display: block;
+  overflow-x: auto;
+}
+
+.table th, .table td {
+  border-bottom: 1px solid var(--color-border);
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th { color: var(--color-muted); font-weight: 600; }
+.table-compact { font-size: 0.85rem; }
+
+.changes {
+  max-width: 320px;
+  word-break: break-word;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+/* Xabarlar */
+.alert {
+  padding: 10px var(--space-md);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-md);
+  border: 1px solid transparent;
+}
+
+.alert-success { background: #dcfce7; border-color: #86efac; color: #166534; }
+.alert-danger { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+.alert-warning { background: #fef3c7; border-color: #fcd34d; color: #92400e; }
+
+/* Status badge'lari */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+.badge-success, .badge-active, .badge-approved, .badge-confirmed,
+.badge-paid, .badge-completed, .badge-create, .badge-restore {
+  background: #dcfce7; color: #166534;
+}
+
+.badge-warning, .badge-pending, .badge-awaiting_payment,
+.badge-waitlisted, .badge-draft, .badge-update {
+  background: #fef3c7; color: #92400e;
+}
+
+.badge-danger, .badge-rejected, .badge-blocked, .badge-overdue,
+.badge-expired, .badge-cancelled, .badge-delete {
+  background: #fee2e2; color: #991b1b;
+}
+
+.badge-closed, .badge-archived { background: #e5e7eb; color: #374151; }
+
+/* Statistika bloklari */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.stat {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-md);
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.stat span {
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* Bildirishnomalar */
+.notification-list { list-style: none; }
+
+.notification {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.notification-unread { border-left: 3px solid var(--color-primary); padding-left: var(--space-sm); }
+
+/* Video */
+.video-wrapper {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  border-radius: var(--radius);
+  margin: var(--space-sm) 0;
+  background: #000;
+}
+
+.video-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.error-code { font-size: 3rem; color: var(--color-danger); }
+
+@media (min-width: 768px) {
+  .card-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  .stats { grid-template-columns: repeat(4, 1fr); }
+  .table { display: table; }
+}

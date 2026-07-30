@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Managerlar — EduGroup{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h1>Manager akkauntlari</h1>
+  <p class="muted">
+    Manager o'z-o'zidan ro'yxatdan o'ta olmaydi — akkaunt faqat shu yerdan yaratiladi
+    va darhol faol bo'ladi.
+  </p>
+
+  <form method="post" action="/web/superadmin/managers" class="form form-inline">
+    <input type="text" name="full_name" placeholder="To'liq ism" required minlength="3">
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="text" name="phone" placeholder="Telefon">
+    <input type="password" name="password" placeholder="Parol (8+)" required minlength="8">
+    <button class="button button-primary" type="submit">Yaratish</button>
+  </form>
+
+  {% if managers %}
+    <table class="table">
+      <thead><tr><th>Ism</th><th>Email</th><th>Telefon</th><th>Holat</th><th>Amal</th></tr></thead>
+      <tbody>
+        {% for manager in managers %}
+          <tr>
+            <td>{{ manager.full_name }}</td>
+            <td>{{ manager.email }}</td>
+            <td>{{ manager.phone or "—" }}</td>
+            <td><span class="badge badge-{{ manager.status.value }}">{{ manager.status.value }}</span></td>
+            <td>
+              {% if manager.status.value == "blocked" %}
+                <form method="post" action="/web/superadmin/users/{{ manager.id }}/unblock">
+                  <input type="hidden" name="next_url" value="/web/superadmin/managers">
+                  <button class="button button-primary" type="submit">Blokdan chiqarish</button>
+                </form>
+              {% else %}
+                <form method="post" action="/web/superadmin/users/{{ manager.id }}/block"
+                      data-confirm="Managerni bloklaysizmi?">
+                  <input type="hidden" name="next_url" value="/web/superadmin/managers">
+                  <button class="button button-danger" type="submit">Bloklash</button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">Hozircha manager yo'q.</p>
+  {% endif %}
+</section>
+{% endblock %}

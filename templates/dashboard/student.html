@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Mening panelim — EduGroup{% endblock %}
+
+{% block content %}
+<h1>Salom, {{ current_user.full_name }}</h1>
+{% if current_user.status.value != "approved" %}
+  <div class="alert alert-warning">
+    Profilingiz holati: {{ current_user.status.value }}. To'lov qilish uchun manager tasdig'i kerak.
+  </div>
+{% endif %}
+
+<section class="card">
+  <h2>Yozilishlarim</h2>
+  {% if enrollment_cards %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Guruh</th><th>Holat</th><th>Navbat</th><th>To'lov</th><th>Amal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for card in enrollment_cards %}
+          <tr>
+            <td>
+              {% if card.group %}
+                <a href="/groups/{{ card.group.id }}">{{ card.group.name }}</a>
+                <div class="muted">{{ card.course.title if card.course else "" }}</div>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge badge-{{ card.enrollment.status.value }}">
+                {{ card.enrollment.status.value }}
+              </span>
+            </td>
+            <td>{{ card.enrollment.waitlist_position or "—" }}</td>
+            <td>
+              {% if card.enrollment.status.value == "awaiting_payment" %}
+                {% if card.plan %}
+                  {# Bo'lib to'lash rejasi bor — navbatdagi bo'lakni to'lash #}
+                  <table class="table table-compact">
+                    {% for installment in card.plan.installments %}
+                      <tr>
+                        <td>{{ installment.sequence_number }}-bo'lak</td>
+                        <td>{{ installment.amount_due | money }} so'm</td>
+                        <td>{{ installment.due_date }}</td>
+                        <td>
+                          <span class="badge badge-{{ installment.status.value }}">
+                            {{ installment.status.value }}
+                          </span>
+                        </td>
+                        <td>
+                          {% if installment.status.value != "paid" %}
+                            <form method="post" action="/web/payments">
+                              <input type="hidden" name="installment_id" value="{{ installment.id }}">
+                              <input type="hidden" name="amount" value="{{ installment.amount_due }}">
+                              <button class="button button-primary" type="submit">To'ladim</button>
+                            </form>
+                          {% endif %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </table>
+                {% else %}
+                  <form method="post" action="/web/payments" class="inline-form">
+                    <input type="hidden" name="enrollment_id" value="{{ card.enrollment.id }}">
+                    <input type="hidden" name="amount" value="{{ card.course.price }}">
+                    <button class="button button-primary" type="submit">
+                      To'liq to'lash ({{ card.course.price | money }} so'm)
+                    </button>
+                  </form>
+
+                  <form method="post" action="/web/enrollments/{{ card.enrollment.id }}/payment-plan"
+                        class="inline-form">
+                    <select name="installments_count">
+                      {% for count in [2, 3, 4] %}
+                        <option value="{{ count }}">{{ count }} bo'lak</option>
+                      {% endfor %}
+                    </select>
+                    <button class="button button-ghost" type="submit">Bo'lib to'lash</button>
+                  </form>
+                {% endif %}
+              {% else %}
+                <span class="muted">—</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if card.enrollment.status.value in ["awaiting_payment", "waitlisted", "active"] %}
+                <form method="post" action="/web/enrollments/{{ card.enrollment.id }}/cancel"
+                      data-confirm="Yozilishni bekor qilasizmi?">
+                  <button class="button button-danger" type="submit">
+                    {% if card.enrollment.status.value == "waitlisted" %}Navbatdan chiqish{% else %}Bekor qilish{% endif %}
+                  </button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">Hali hech qaysi guruhga yozilmagansiz. <a href="/">Katalogni ko'ring</a>.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>To'lovlarim</h2>
+  {% if payments %}
+    <table class="table">
+      <thead><tr><th>Sana</th><th>Summa</th><th>Holat</th><th>Izoh</th></tr></thead>
+      <tbody>
+        {% for payment in payments %}
+          <tr>
+            <td>{{ payment.created_at.strftime("%Y-%m-%d") }}</td>
+            <td>{{ payment.amount | money }} so'm</td>
+            <td><span class="badge badge-{{ payment.status.value }}">{{ payment.status.value }}</span></td>
+            <td>{{ payment.note or "" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">To'lovlar yo'q.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Darslar progressi</h2>
+  <p>Ko'rilgan darslar soni: <strong>{{ watched_count }}</strong></p>
+</section>
+
+<section class="card">
+  <h2>Bildirishnomalar</h2>
+  {% include "partials/notification_preview.html" %}
+</section>
+{% endblock %}

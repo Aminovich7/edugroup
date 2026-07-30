@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Profil — EduGroup{% endblock %}
+
+{% block content %}
+<section class="card card-narrow">
+  <h1>Mening profilim</h1>
+  <p>
+    Rol: <strong>{{ user.role.value }}</strong> |
+    Holat: <span class="badge badge-{{ user.status.value }}">{{ user.status.value }}</span>
+  </p>
+
+  <form method="post" action="/web/profile/edit" class="form">
+    <label class="field">
+      <span>To'liq ism</span>
+      <input type="text" name="full_name" value="{{ user.full_name }}" minlength="3">
+    </label>
+
+    <label class="field">
+      <span>Email (o'zgartirib bo'lmaydi)</span>
+      <input type="email" value="{{ user.email }}" disabled>
+    </label>
+
+    <label class="field">
+      <span>Telefon</span>
+      <input type="text" name="phone" value="{{ user.phone or '' }}">
+    </label>
+
+    {% if user.role.value == "teacher" %}
+      <label class="field">
+        <span>Mutaxassislik</span>
+        <input type="text" name="specialization"
+               value="{{ user.teacher_profile.specialization if user.teacher_profile else '' }}">
+      </label>
+      <label class="field">
+        <span>Tajriba (yil)</span>
+        <input type="number" name="experience_years" min="0" max="70"
+               value="{{ user.teacher_profile.experience_years if user.teacher_profile else 0 }}">
+      </label>
+      <label class="field">
+        <span>O'zingiz haqingizda</span>
+        <textarea name="bio" rows="3">{{ user.teacher_profile.bio if user.teacher_profile else '' }}</textarea>
+      </label>
+    {% elif user.role.value == "student" %}
+      <label class="field">
+        <span>Tug'ilgan sana</span>
+        <input type="date" name="birth_date"
+               value="{{ user.student_profile.birth_date if user.student_profile and user.student_profile.birth_date else '' }}">
+      </label>
+    {% endif %}
+
+    <button class="button button-primary" type="submit">Saqlash</button>
+  </form>
+</section>
+{% endblock %}

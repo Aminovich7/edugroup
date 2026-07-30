@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}O'qituvchi paneli — EduGroup{% endblock %}
+
+{% block content %}
+<h1>O'qituvchi paneli</h1>
+{% if current_user.status.value != "approved" %}
+  <div class="alert alert-warning">
+    Profilingiz holati: {{ current_user.status.value }}. Kurs va guruh yaratish uchun manager tasdig'i kerak.
+  </div>
+{% endif %}
+
+<section class="card">
+  <h2>Yangi kurs</h2>
+  <form method="post" action="/web/courses" class="form form-inline">
+    <input type="text" name="title" placeholder="Kurs nomi" required minlength="3">
+    <input type="text" name="subject" placeholder="Fan" required>
+    <input type="number" name="price" placeholder="Narx" min="0" step="1000" required>
+    <input type="text" name="description" placeholder="Tavsif">
+    <button class="button button-primary" type="submit">Yaratish</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Kurslarim</h2>
+  {% if courses %}
+    <table class="table">
+      <thead><tr><th>Nomi</th><th>Fan</th><th>Narx</th><th>Holat</th><th>Amal</th></tr></thead>
+      <tbody>
+        {% for course in courses %}
+          <tr>
+            <td><a href="/courses/{{ course.id }}">{{ course.title }}</a></td>
+            <td>{{ course.subject }}</td>
+            <td>{{ course.price | money }} so'm</td>
+            <td><span class="badge badge-{{ course.status.value }}">{{ course.status.value }}</span></td>
+            <td>
+              <a class="button button-ghost" href="/web/courses/{{ course.id }}/edit">Tahrirlash</a>
+              <form method="post" action="/web/courses/{{ course.id }}/delete"
+                    data-confirm="Kursni o'chirasizmi?">
+                <button class="button button-danger" type="submit">O'chirish</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h3>Yangi guruh</h3>
+    <form method="post" action="/web/groups" class="form form-inline">
+      <select name="course_id" required>
+        {% for course in courses %}
+          <option value="{{ course.id }}">{{ course.title }}</option>
+        {% endfor %}
+      </select>
+      <input type="text" name="name" placeholder="Guruh nomi" required minlength="3">
+      <input type="number" name="capacity" placeholder="Sig'im" min="1" max="200" required>
+      <input type="text" name="schedule" placeholder="Dush, Chor 18:00" required>
+      <button class="button button-primary" type="submit">Yaratish</button>
+    </form>
+  {% else %}
+    <p class="muted">Hali kurs yaratmagansiz.</p>
+  {% endif %}
+</section>
+
+{% for card in group_cards %}
+  <section class="card">
+    <div class="section-header">
+      <h2>{{ card.group.name }}</h2>
+      <span class="badge badge-{{ card.group.status.value }}">{{ card.group.status.value }}</span>
+    </div>
+    <p class="muted">{{ card.group.schedule }} | Sig'im: {{ card.group.capacity }}</p>
+    <div class="actions">
+      <a class="button button-ghost" href="/groups/{{ card.group.id }}">Ko'rish</a>
+      <a class="button button-ghost" href="/web/groups/{{ card.group.id }}/edit">Tahrirlash</a>
+      <a class="button button-ghost" href="/reports/groups/{{ card.group.id }}">Hisobot</a>
+    </div>
+
+    <h3>O'quvchilar</h3>
+    {% if card.students %}
+      <table class="table">
+        <thead><tr><th>Yozilish sanasi</th><th>Holat</th></tr></thead>
+        <tbody>
+          {% for enrollment in card.students %}
+            <tr>
+              <td>{{ enrollment.requested_at.strftime("%Y-%m-%d") }}</td>
+              <td>
+                <span class="badge badge-{{ enrollment.status.value }}">{{ enrollment.status.value }}</span>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">O'quvchilar yo'q.</p>
+    {% endif %}
+
+    <h3>Navbat (waitlist)</h3>
+    {% if card.waitlist %}
+      <table class="table">
+        <thead><tr><th>#</th><th>So'rov sanasi</th></tr></thead>
+        <tbody>
+          {% for enrollment in card.waitlist %}
+            <tr>
+              <td>{{ enrollment.waitlist_position }}</td>
+              <td>{{ enrollment.requested_at.strftime("%Y-%m-%d %H:%M") }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">Navbat bo'sh.</p>
+    {% endif %}
+
+    <h3>Progress</h3>
+    {% if card.progress %}
+      <table class="table">
+        <thead><tr><th>O'quvchi</th><th>Ko'rilgan darslar</th></tr></thead>
+        <tbody>
+          {% for row in card.progress %}
+            <tr>
+              <td>{{ row.student_name }}</td>
+              <td>{{ row.watched_lessons }} / {{ row.total_lessons }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">Hali progress yo'q.</p>
+    {% endif %}
+
+    <h3>Dars qo'shish</h3>
+    <form method="post" action="/web/lessons" class="form form-inline" data-validate-lesson>
+      <input type="hidden" name="group_id" value="{{ card.group.id }}">
+      <input type="text" name="title" placeholder="Dars nomi" required minlength="3">
+      <input type="text" name="kinescope_video_id" placeholder="Kinescope video ID" required>
+      <input type="url" name="kinescope_url" placeholder="https://kinescope.io/..." required>
+      <input type="number" name="duration_seconds" placeholder="Soniya (300-600)"
+             min="300" max="600" required>
+      <input type="number" name="order_index" placeholder="Tartib" min="1" value="{{ card.lessons | length + 1 }}">
+      <button class="button button-primary" type="submit">Qo'shish</button>
+    </form>
+  </section>
+{% endfor %}
+
+<section class="card">
+  <h2>Bildirishnomalar</h2>
+  {% include "partials/notification_preview.html" %}
+</section>
+{% endblock %}

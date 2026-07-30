@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Ro'yxatdan o'tish — EduGroup{% endblock %}
+
+{% block content %}
+<section class="card card-narrow">
+  <h1>Ro'yxatdan o'tish</h1>
+  <p class="muted">Profilingiz manager tomonidan tasdiqlangandan keyin faollashadi.</p>
+
+  <form method="post" action="/register" class="form">
+    <label class="field">
+      <span>Kim sifatida?</span>
+      <select name="role" id="register-role">
+        <option value="student">O'quvchi</option>
+        <option value="teacher">O'qituvchi</option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span>To'liq ism</span>
+      <input type="text" name="full_name" required minlength="3">
+    </label>
+
+    <label class="field">
+      <span>Email</span>
+      <input type="email" name="email" required>
+    </label>
+
+    <label class="field">
+      <span>Telefon</span>
+      <input type="text" name="phone" placeholder="+998901234567">
+    </label>
+
+    <label class="field">
+      <span>Parol (kamida 8 belgi)</span>
+      <input type="password" name="password" required minlength="8">
+    </label>
+
+    <div id="student-fields">
+      <label class="field">
+        <span>Tug'ilgan sana</span>
+        <input type="date" name="birth_date">
+      </label>
+    </div>
+
+    <div id="teacher-fields" hidden>
+      <label class="field">
+        <span>Mutaxassislik</span>
+        <input type="text" name="specialization" placeholder="Matematika, IELTS ...">
+      </label>
+      <label class="field">
+        <span>Tajriba (yil)</span>
+        <input type="number" name="experience_years" min="0" max="70" value="0">
+      </label>
+      <label class="field">
+        <span>O'zingiz haqingizda</span>
+        <textarea name="bio" rows="3"></textarea>
+      </label>
+    </div>
+
+    <button class="button button-primary" type="submit">Ro'yxatdan o'tish</button>
+  </form>
+
+  <p class="muted">Akkauntingiz bormi? <a href="/login">Kirish</a></p>
+</section>
+{% endblock %}

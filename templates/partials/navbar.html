@@ -1,0 +1,28 @@
+{# Rolga qarab havolalar. O'qilmagan bildirishnoma soni serverda hisoblanadi. #}
+<header class="navbar">
+  <div class="container navbar-inner">
+    <a class="navbar-brand" href="/">EduGroup</a>
+
+    <button class="navbar-toggle" data-toggle="navbar-menu" type="button">☰</button>
+
+    <nav class="navbar-menu" id="navbar-menu">
+      <a href="/">Katalog</a>
+
+      {% if current_user %}
+        <a href="/dashboard">Boshqaruv paneli</a>
+        <a href="/profile">Profil</a>
+        <a href="/notifications">
+          Bildirishnomalar
+          {% if unread_count %}<span class="badge badge-danger">{{ unread_count }}</span>{% endif %}
+        </a>
+        <span class="navbar-user">{{ current_user.full_name }} ({{ current_user.role.value }})</span>
+        <form method="post" action="/logout">
+          <button class="button button-ghost" type="submit">Chiqish</button>
+        </form>
+      {% else %}
+        <a href="/login">Kirish</a>
+        <a class="button button-primary" href="/register">Ro'yxatdan o'tish</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>

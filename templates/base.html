@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}EduGroup{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/components.css">
+</head>
+<body>
+  {% include "partials/navbar.html" %}
+
+  <main class="container">
+    {% include "partials/flash_messages.html" %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="container">EduGroup — onlayn ta'lim platformasi</div>
+  </footer>
+
+  <script src="/static/js/ui.js"></script>
+  <script src="/static/js/validation.js"></script>
+  <script src="/static/js/confirm.js"></script>
+</body>
+</html>

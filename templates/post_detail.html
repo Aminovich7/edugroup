@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}
+  {% if entity_type == "course" %}{{ course.title }}{% else %}{{ group.name }}{% endif %} — EduGroup
+{% endblock %}
+
+{% block content %}
+{% if entity_type == "course" %}
+  {# ---------- Kurs tafsilotlari ---------- #}
+  <section class="card">
+    <h1>{{ course.title }}</h1>
+    <p class="muted">{{ course.subject }} — {{ course.teacher.full_name }}</p>
+    <p>{{ course.description or "Tavsif kiritilmagan." }}</p>
+    <p class="price">{{ course.price | money }} so'm</p>
+    <span class="badge badge-{{ course.status.value }}">{{ course.status.value }}</span>
+
+    {% if can_edit %}
+      <div class="actions">
+        <a class="button button-ghost" href="/web/courses/{{ course.id }}/edit">Tahrirlash</a>
+        <form method="post" action="/web/courses/{{ course.id }}/delete" data-confirm="Kursni o'chirasizmi?">
+          <button class="button button-danger" type="submit">O'chirish</button>
+        </form>
+      </div>
+    {% endif %}
+  </section>
+
+  <h2>Guruhlar</h2>
+  {% if groups %}
+    <div class="card-grid">
+      {% for item in groups %}
+        <article class="card">
+          <h3><a href="/groups/{{ item.id }}">{{ item.name }}</a></h3>
+          <p>{{ item.schedule }}</p>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">Bu kursda hozircha faol guruh yo'q.</p>
+  {% endif %}
+
+{% else %}
+  {# ---------- Guruh tafsilotlari ---------- #}
+  <section class="card">
+    <h1>{{ group.name }}</h1>
+    <p class="muted">{{ course.title }} — {{ course.subject }}</p>
+    <p>O'qituvchi: {{ group.teacher.full_name }}</p>
+    <p>Jadval: {{ group.schedule }}</p>
+    <p class="price">{{ course.price | money }} so'm</p>
+    <p>
+      Sig'im: {{ group.capacity }} |
+      Band: {{ seats.occupied_seats }} |
+      Bo'sh: {{ seats.free_seats }} |
+      Navbatda: {{ seats.waitlist_count }}
+    </p>
+    <span class="badge badge-{{ group.status.value }}">{{ group.status.value }}</span>
+
+    {% if can_edit %}
+      <div class="actions">
+        <a class="button button-ghost" href="/web/groups/{{ group.id }}/edit">Tahrirlash</a>
+        <a class="button button-ghost" href="/reports/groups/{{ group.id }}">Hisobot</a>
+        <form method="post" action="/web/groups/{{ group.id }}/delete" data-confirm="Guruhni o'chirasizmi?">
+          <button class="button button-danger" type="submit">O'chirish</button>
+        </form>
+      </div>
+    {% endif %}
+  </section>
+
+  {# ---------- Yozilish / navbat ---------- #}
+  {% if current_user and current_user.role.value == "student" %}
+    <section class="card">
+      {% if my_enrollment %}
+        <p>
+          Holatingiz:
+          <span class="badge badge-{{ my_enrollment.status.value }}">{{ my_enrollment.status.value }}</span>
+          {% if my_enrollment.waitlist_position %}
+            — navbatda {{ my_enrollment.waitlist_position }}-o'rin
+          {% endif %}
+        </p>
+        <form method="post" action="/web/enrollments/{{ my_enrollment.id }}/cancel"
+              data-confirm="Yozilishni bekor qilasizmi?">
+          <input type="hidden" name="next_url" value="/groups/{{ group.id }}">
+          <button class="button button-danger" type="submit">Bekor qilish</button>
+        </form>
+      {% else %}
+        <form method="post" action="/web/enrollments">
+          <input type="hidden" name="group_id" value="{{ group.id }}">
+          <button class="button button-primary" type="submit">
+            {% if seats.free_seats > 0 %}Guruhga yozilish{% else %}Navbatga qo'shilish{% endif %}
+          </button>
+        </form>
+      {% endif %}
+    </section>
+  {% elif not current_user %}
+    <section class="card">
+      <p>Guruhga yozilish uchun <a href="/login">tizimga kiring</a>.</p>
+    </section>
+  {% endif %}
+
+  {# ---------- Darslar ---------- #}
+  <h2>Darslar</h2>
+  {% if can_watch %}
+    {% if lessons %}
+      {% for lesson in lessons %}
+        <article class="card lesson">
+          <h3>{{ lesson.order_index }}. {{ lesson.title }}</h3>
+          <p class="muted">{{ (lesson.duration_seconds // 60) }} daqiqa</p>
+          <p>{{ lesson.description or "" }}</p>
+
+          <div class="video-wrapper">
+            <iframe src="{{ lesson.kinescope_url }}" allowfullscreen title="{{ lesson.title }}"></iframe>
+          </div>
+
+          {% if current_user.role.value == "student" %}
+            {% if lesson.id in watched_lesson_ids %}
+              <span class="badge badge-success">Ko'rilgan</span>
+            {% else %}
+              <form method="post" action="/web/lessons/{{ lesson.id }}/progress">
+                <input type="hidden" name="next_url" value="/groups/{{ group.id }}">
+                <button class="button button-ghost" type="submit">Ko'rildi deb belgilash</button>
+              </form>
+            {% endif %}
+          {% elif can_edit %}
+            <div class="actions">
+              <a class="button button-ghost" href="/web/lessons/{{ lesson.id }}/edit">Tahrirlash</a>
+              <form method="post" action="/web/lessons/{{ lesson.id }}/delete"
+                    data-confirm="Darsni o'chirasizmi?">
+                <button class="button button-danger" type="submit">O'chirish</button>
+              </form>
+            </div>
+          {% endif %}
+        </article>
+      {% endfor %}
+    {% else %}
+      <p class="muted">Bu guruhda hozircha dars yo'q.</p>
+    {% endif %}
+  {% else %}
+    <p class="muted">Darslarni ko'rish uchun guruhga yozilib, to'lovni amalga oshiring.</p>
+  {% endif %}
+{% endif %}
+{% endblock %}

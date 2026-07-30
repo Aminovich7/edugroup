@@ -1,0 +1,13 @@
+{# Foydalanuvchini bloklash/blokdan chiqarish tugmalari. `user` o'zgaruvchisini kutadi. #}
+{% if user.status.value == "blocked" %}
+  <form method="post" action="/web/superadmin/users/{{ user.id }}/unblock">
+    <input type="hidden" name="next_url" value="/dashboard/superadmin">
+    <button class="button button-primary" type="submit">Blokdan chiqarish</button>
+  </form>
+{% else %}
+  <form method="post" action="/web/superadmin/users/{{ user.id }}/block"
+        data-confirm="Foydalanuvchini bloklaysizmi?">
+    <input type="hidden" name="next_url" value="/dashboard/superadmin">
+    <button class="button button-danger" type="submit">Bloklash</button>
+  </form>
+{% endif %}

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Tahrirlash — EduGroup{% endblock %}
+
+{% block content %}
+<section class="card card-narrow">
+  {% if entity_type == "course" %}
+    <h1>Kursni tahrirlash</h1>
+    <form method="post" action="/web/courses/{{ course.id }}/edit" class="form">
+      <label class="field">
+        <span>Sarlavha</span>
+        <input type="text" name="title" value="{{ course.title }}" required minlength="3">
+      </label>
+      <label class="field">
+        <span>Fan</span>
+        <input type="text" name="subject" value="{{ course.subject }}" required>
+      </label>
+      <label class="field">
+        <span>Narx (so'm)</span>
+        <input type="number" name="price" value="{{ course.price }}" min="0" step="1000" required>
+      </label>
+      <label class="field">
+        <span>Holat</span>
+        <select name="status">
+          {% for option in ["draft", "active", "archived"] %}
+            <option value="{{ option }}" {% if course.status.value == option %}selected{% endif %}>
+              {{ option }}
+            </option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="field">
+        <span>Tavsif</span>
+        <textarea name="description" rows="4">{{ course.description or "" }}</textarea>
+      </label>
+      <button class="button button-primary" type="submit">Saqlash</button>
+      <a class="button button-ghost" href="/courses/{{ course.id }}">Bekor qilish</a>
+    </form>
+
+  {% elif entity_type == "group" %}
+    <h1>Guruhni tahrirlash</h1>
+    <form method="post" action="/web/groups/{{ group.id }}/edit" class="form">
+      <label class="field">
+        <span>Nomi</span>
+        <input type="text" name="name" value="{{ group.name }}" required minlength="3">
+      </label>
+      <label class="field">
+        <span>Sig'im</span>
+        <input type="number" name="capacity" value="{{ group.capacity }}" min="1" max="200" required>
+      </label>
+      <label class="field">
+        <span>Jadval</span>
+        <input type="text" name="schedule" value="{{ group.schedule }}" required>
+      </label>
+
+      {% if can_change_status %}
+        <label class="field">
+          <span>Holatni o'zgartirish</span>
+          <select name="status">
+            <option value="">— o'zgartirmaslik —</option>
+            {% for option in status_options %}
+              <option value="{{ option }}">{{ option }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <p class="muted">
+          closed — yangi yozilish qabul qilinmaydi, mavjud o'quvchilar darslarni ko'raveradi.
+          archived — guruh katalogdan butunlay yashiriladi.
+        </p>
+      {% endif %}
+
+      <button class="button button-primary" type="submit">Saqlash</button>
+      <a class="button button-ghost" href="/groups/{{ group.id }}">Bekor qilish</a>
+    </form>
+
+  {% else %}
+    <h1>Darsni tahrirlash</h1>
+    <form method="post" action="/web/lessons/{{ lesson.id }}/edit" class="form" data-validate-lesson>
+      <label class="field">
+        <span>Sarlavha</span>
+        <input type="text" name="title" value="{{ lesson.title }}" required minlength="3">
+      </label>
+      <label class="field">
+        <span>Kinescope video ID</span>
+        <input type="text" name="kinescope_video_id" value="{{ lesson.kinescope_video_id }}" required>
+      </label>
+      <label class="field">
+        <span>Kinescope havolasi</span>
+        <input type="url" name="kinescope_url" value="{{ lesson.kinescope_url }}" required>
+      </label>
+      <label class="field">
+        <span>Davomiyligi (soniya, 300–600)</span>
+        <input type="number" name="duration_seconds" value="{{ lesson.duration_seconds }}"
+               min="300" max="600" required>
+      </label>
+      <label class="field">
+        <span>Tartib raqami</span>
+        <input type="number" name="order_index" value="{{ lesson.order_index }}" min="1" required>
+      </label>
+      <label class="field">
+        <span>Tavsif</span>
+        <textarea name="description" rows="3">{{ lesson.description or "" }}</textarea>
+      </label>
+      <button class="button button-primary" type="submit">Saqlash</button>
+      <a class="button button-ghost" href="/groups/{{ lesson.group_id }}">Bekor qilish</a>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

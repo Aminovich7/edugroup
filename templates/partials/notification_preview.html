@@ -1,0 +1,16 @@
+{# Dashboard'larda oxirgi 5 ta bildirishnomani ko'rsatadi. #}
+{% if notifications %}
+  <ul class="notification-list">
+    {% for notification in notifications[:5] %}
+      <li class="notification {% if not notification.is_read %}notification-unread{% endif %}">
+        <div>
+          <strong>{{ notification.title }}</strong>
+          <p>{{ notification.message }}</p>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+  <a class="button button-ghost" href="/notifications">Barchasini ko'rish</a>
+{% else %}
+  <p class="muted">Bildirishnomalar yo'q.</p>
+{% endif %}

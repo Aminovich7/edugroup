@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block title %}Manager paneli — EduGroup{% endblock %}
+
+{% block content %}
+<h1>Manager paneli</h1>
+
+<section class="card">
+  <h2>Moderatsiya navbati</h2>
+  {% if pending_users %}
+    <table class="table">
+      <thead><tr><th>Ism</th><th>Email</th><th>Rol</th><th>Amal</th></tr></thead>
+      <tbody>
+        {% for user in pending_users %}
+          <tr>
+            <td>{{ user.full_name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role.value }}</td>
+            <td class="actions">
+              <form method="post" action="/web/manager/users/{{ user.id }}/approve">
+                <button class="button button-primary" type="submit">Tasdiqlash</button>
+              </form>
+              <form method="post" action="/web/manager/users/{{ user.id }}/reject"
+                    class="inline-form" data-confirm="Profilni rad etasizmi?">
+                <input type="text" name="reason" placeholder="Rad etish sababi" required>
+                <button class="button button-danger" type="submit">Rad etish</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">Kutayotgan profillar yo'q.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Tasdiqlanishi kerak bo'lgan to'lovlar</h2>
+  {% if pending_payments %}
+    <table class="table">
+      <thead><tr><th>Sana</th><th>Summa</th><th>Amal</th></tr></thead>
+      <tbody>
+        {% for payment in pending_payments %}
+          <tr>
+            <td>{{ payment.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+            <td>{{ payment.amount | money }} so'm</td>
+            <td class="actions">
+              <form method="post" action="/web/manager/payments/{{ payment.id }}/confirm">
+                <button class="button button-primary" type="submit">Tasdiqlash</button>
+              </form>
+              <form method="post" action="/web/manager/payments/{{ payment.id }}/reject"
+                    class="inline-form" data-confirm="To'lovni rad etasizmi?">
+                <input type="text" name="reason" placeholder="Sabab" required>
+                <button class="button button-danger" type="submit">Rad etish</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">Kutayotgan to'lovlar yo'q.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Guruhlar</h2>
+  {% for card in group_cards %}
+    <article class="sub-card">
+      <div class="section-header">
+        <h3>{{ card.group.name }}</h3>
+        <span class="badge badge-{{ card.group.status.value }}">{{ card.group.status.value }}</span>
+      </div>
+      <p class="muted">
+        {{ card.course.title if card.course else "" }} |
+        O'qituvchi: {{ card.group.teacher.full_name }} |
+        Sig'im: {{ card.group.capacity }}
+      </p>
+
+      <div class="actions">
+        <a class="button button-ghost" href="/groups/{{ card.group.id }}">Ko'rish</a>
+        <a class="button button-ghost" href="/web/groups/{{ card.group.id }}/edit">Tahrirlash</a>
+        <a class="button button-ghost" href="/reports/groups/{{ card.group.id }}">Hisobot</a>
+
+        <form method="post" action="/web/manager/groups/{{ card.group.id }}/assign-teacher"
+              class="inline-form">
+          <select name="teacher_id">
+            <option value="">— joriy o'qituvchini qoldirish —</option>
+            {% for teacher in approved_teachers %}
+              <option value="{{ teacher.id }}">{{ teacher.full_name }}</option>
+            {% endfor %}
+          </select>
+          <button class="button button-primary" type="submit">Tasdiqlash / biriktirish</button>
+        </form>
+      </div>
+
+      {% if card.waitlist %}
+        <h4>Navbat</h4>
+        <table class="table table-compact">
+          <thead><tr><th>#</th><th>So'rov sanasi</th></tr></thead>
+          <tbody>
+            {% for enrollment in card.waitlist %}
+              <tr>
+                <td>{{ enrollment.waitlist_position }}</td>
+                <td>{{ enrollment.requested_at.strftime("%Y-%m-%d %H:%M") }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+    </article>
+  {% else %}
+    <p class="muted">Guruhlar yo'q.</p>
+  {% endfor %}
+</section>
+
+<section class="card">
+  <h2>Barcha yozilishlar</h2>
+  <form method="get" action="/dashboard/manager" class="filters">
+    <label class="field">
+      <span>Holat</span>
+      <select name="enrollment_status">
+        <option value="">— barchasi —</option>
+        {% for option in ["awaiting_payment", "waitlisted", "active", "expired", "cancelled"] %}
+          <option value="{{ option }}" {% if enrollment_filters.status == option %}selected{% endif %}>
+            {{ option }}
+          </option>
+        {% endfor %}
+      </select>
+    </label>
+    <button class="button button-primary" type="submit">Filtrlash</button>
+  </form>
+
+  {% if enrollment_rows %}
+    <table class="table">
+      <thead><tr><th>Guruh</th><th>Holat</th><th>Navbat</th><th>Sana</th><th>Amal</th></tr></thead>
+      <tbody>
+        {% for row in enrollment_rows %}
+          <tr>
+            <td>{{ row.group.name if row.group else "—" }}</td>
+            <td>
+              <span class="badge badge-{{ row.enrollment.status.value }}">
+                {{ row.enrollment.status.value }}
+              </span>
+            </td>
+            <td>{{ row.enrollment.waitlist_position or "—" }}</td>
+            <td>{{ row.enrollment.requested_at.strftime("%Y-%m-%d") }}</td>
+            <td>
+              {% if row.enrollment.status.value in ["awaiting_payment", "waitlisted", "active"] %}
+                <form method="post" action="/web/enrollments/{{ row.enrollment.id }}/cancel"
+                      class="inline-form" data-confirm="Yozilishni bekor qilasizmi?">
+                  <input type="hidden" name="next_url" value="/dashboard/manager">
+                  <input type="text" name="reason" placeholder="Sabab (majburiy)" required>
+                  <button class="button button-danger" type="submit">Bekor qilish</button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">Yozilishlar topilmadi.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Bildirishnomalar</h2>
+  {% include "partials/notification_preview.html" %}
+</section>
+{% endblock %}

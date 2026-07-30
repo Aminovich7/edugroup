@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Kurslar katalogi — EduGroup{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>O'qituvchilar va guruhlar</h1>
+  <p>O'zingizga mos guruhni tanlang, yozilib to'lovni amalga oshiring va darslarni ko'ring.</p>
+</section>
+
+<form method="get" action="/" class="filters">
+  <label class="field">
+    <span>Fan</span>
+    <input type="text" name="subject" value="{{ filters.subject }}" placeholder="Matematika">
+  </label>
+  <label class="field">
+    <span>Maksimal narx</span>
+    <input type="number" name="max_price" value="{{ filters.max_price }}" min="0" step="1000">
+  </label>
+  <button class="button button-primary" type="submit">Filtrlash</button>
+  <a class="button button-ghost" href="/">Tozalash</a>
+</form>
+
+<h2>Guruhlar</h2>
+{% if group_cards %}
+  <div class="card-grid">
+    {% for card in group_cards %}
+      <article class="card">
+        <h3><a href="/groups/{{ card.group.id }}">{{ card.group.name }}</a></h3>
+        <p class="muted">{{ card.group.course.title }} — {{ card.group.course.subject }}</p>
+        <p>O'qituvchi: {{ card.group.teacher.full_name }}</p>
+        <p>Jadval: {{ card.group.schedule }}</p>
+        <p class="price">{{ card.group.course.price | money }} so'm</p>
+
+        {% if card.seats.free_seats > 0 %}
+          <span class="badge badge-success">{{ card.seats.free_seats }} ta joy bor</span>
+        {% else %}
+          <span class="badge badge-warning">Guruh to'la — {{ card.seats.waitlist_count }} kishi navbatda</span>
+        {% endif %}
+
+        <a class="button button-primary" href="/groups/{{ card.group.id }}">Batafsil</a>
+      </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="muted">Hozircha faol guruhlar yo'q.</p>
+{% endif %}
+
+<h2>Kurslar</h2>
+{% if courses %}
+  <div class="card-grid">
+    {% for course in courses %}
+      <article class="card">
+        <h3><a href="/courses/{{ course.id }}">{{ course.title }}</a></h3>
+        <p class="muted">{{ course.subject }}</p>
+        <p>O'qituvchi: {{ course.teacher.full_name }}</p>
+        <p class="price">{{ course.price | money }} so'm</p>
+      </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="muted">Hozircha faol kurslar yo'q.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Kirish — EduGroup{% endblock %}
+
+{% block content %}
+<section class="card card-narrow">
+  <h1>Tizimga kirish</h1>
+
+  <form method="post" action="/login" class="form">
+    <label class="field">
+      <span>Email</span>
+      <input type="email" name="email" required autocomplete="email">
+    </label>
+
+    <label class="field">
+      <span>Parol</span>
+      <input type="password" name="password" required autocomplete="current-password">
+    </label>
+
+    <button class="button button-primary" type="submit">Kirish</button>
+  </form>
+
+  <p class="muted">Akkauntingiz yo'qmi? <a href="/register">Ro'yxatdan o'ting</a></p>
+</section>
+{% endblock %}
